@@ -3,6 +3,7 @@ import { useState, useCallback } from "react";
 import { correctSet, isAnswerCorrect, isMultiAnswer, type Question } from "@/data/types";
 import { useCert } from "@/components/certProvider";
 import { AceCert } from "@/data/ace";
+import { useClientPick } from "@/lib/useClientPick";
 import SecBadge from "@/components/secBadge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,21 +11,17 @@ import { cn } from "@/lib/utils";
 
 export default function QuizMode({ section, topic }: Readonly<{ section: number; topic: string | null }>) {
   const cert = useCert() ?? AceCert;
-  const [q, setQ] = useState<Question | null>(() => cert.getRandomQuestion(section, topic, null));
   const [picks, setPicks] = useState<string[]>([]);
   const [revealed, setRevealed] = useState(false);
   const [score, setScore] = useState({ c: 0, t: 0 });
   const [dots, setDots] = useState<boolean[]>([]);
-  const [prevSection, setPrevSection] = useState(section);
-  const [prevTopic, setPrevTopic] = useState(topic);
 
-  if (prevSection !== section || prevTopic !== topic) {
-    setPrevSection(section);
-    setPrevTopic(topic);
-    setPicks([]);
-    setRevealed(false);
-    setQ(cert.getRandomQuestion(section, topic, null));
-  }
+  const { mounted, item: q, setItem: setQ } = useClientPick<Question>(
+    () => cert.getRandomQuestion(section, topic, null),
+    section,
+    topic,
+    () => { setPicks([]); setRevealed(false); },
+  );
 
   const load = useCallback(() => {
     setPicks([]);
@@ -70,7 +67,7 @@ export default function QuizMode({ section, topic }: Readonly<{ section: number;
   if (!q) return (
     <Card>
       <CardContent className="py-8 text-center text-muted-foreground text-sm">
-        No questions found for this section/topic.
+        {mounted ? "No questions found for this section/topic." : "Loading…"}
       </CardContent>
     </Card>
   );

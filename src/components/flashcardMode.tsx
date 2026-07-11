@@ -3,6 +3,7 @@ import { useState, useCallback } from "react";
 import type { Flashcard } from "@/data/types";
 import { useCert } from "@/components/certProvider";
 import { AceCert } from "@/data/ace";
+import { useClientPick } from "@/lib/useClientPick";
 import SecBadge from "@/components/secBadge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,19 +12,16 @@ import { cn } from "@/lib/utils";
 
 export default function FlashcardMode({ section, topic }: { section: number; topic: string | null }) {
   const cert = useCert() ?? AceCert;
-  const [card, setCard] = useState<Flashcard | null>(() => cert.getRandomFlashcard(section, topic, null));
   const [flipped, setFlipped] = useState(false);
   const [count, setCount] = useState(0);
   const [visible, setVisible] = useState(true);
-  const [prevSection, setPrevSection] = useState(section);
-  const [prevTopic, setPrevTopic] = useState(topic);
 
-  if (prevSection !== section || prevTopic !== topic) {
-    setPrevSection(section);
-    setPrevTopic(topic);
-    setFlipped(false);
-    setCard(cert.getRandomFlashcard(section, topic, null));
-  }
+  const { mounted, item: card, setItem: setCard } = useClientPick<Flashcard>(
+    () => cert.getRandomFlashcard(section, topic, null),
+    section,
+    topic,
+    () => setFlipped(false),
+  );
 
   const load = useCallback(() => {
     setVisible(false);
@@ -38,7 +36,7 @@ export default function FlashcardMode({ section, topic }: { section: number; top
   if (!card) return (
     <Card>
       <CardContent className="py-8 text-center text-muted-foreground text-sm">
-        No flashcards found for this section/topic.
+        {mounted ? "No flashcards found for this section/topic." : "Loading…"}
       </CardContent>
     </Card>
   );

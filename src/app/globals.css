@@ -372,7 +372,7 @@ body {
 .opt-btn--dimmed {
   background: var(--bg-elevated) !important;
   border-color: var(--border-subtle) !important;
-  opacity: 0.4;
+  opacity: 0.6;
 }
 .opt-btn--selected {
   background: oklch(0.491 0.113 244 / 0.12) !important;

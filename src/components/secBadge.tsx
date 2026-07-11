@@ -1,8 +1,10 @@
 "use client";
-import { SECTIONS } from "@/data";
+import { useCert } from "@/components/certProvider";
+import { AceCert } from "@/data/ace";
 
 export default function SecBadge({ section, topic }: { section: number; topic?: string }) {
-  const s = SECTIONS.find((x) => x.id === section);
+  const cert = useCert() ?? AceCert;
+  const s = cert.sections.find((x) => x.id === section);
   return (
     <div className="flex flex-wrap gap-1.5 items-center">
       <span
